@@ -13,13 +13,15 @@ It demonstrates the boring-but-hard parts of moving money correctly:
 
 ## Status
 
-Early development. The application boots with a health endpoint and Swagger docs.
-The ledger domain (accounts, transfers, reconciliation) is being built next.
+Early development. The application boots with a health endpoint and Swagger docs,
+and the PostgreSQL schema (accounts, transfers, ledger entries) is in place via
+TypeORM migrations. The transfer and reconciliation APIs are being built next.
 
 ## Requirements
 
 - Node.js 22+
 - pnpm 10+
+- Docker (for a local PostgreSQL instance)
 
 ## Setup
 
@@ -27,6 +29,29 @@ The ledger domain (accounts, transfers, reconciliation) is being built next.
 pnpm install
 cp .env.example .env
 ```
+
+## Database
+
+Start PostgreSQL and apply the schema:
+
+```bash
+pnpm db:up              # start Postgres via docker-compose
+pnpm migration:run      # apply migrations
+```
+
+Other database commands:
+
+```bash
+pnpm migration:generate src/database/migrations/SomeName   # generate a migration from entity changes
+pnpm migration:revert                                      # roll back the last migration
+pnpm db:down                                               # stop Postgres
+```
+
+Data model:
+
+- `accounts` hold a running balance in minor units (`balance_minor`, a bigint).
+- `transfers` are balanced double-entry transactions with a unique `idempotency_key`.
+- `ledger_entries` are the immutable debit/credit legs; per transfer, debits equal credits.
 
 ## Run
 
