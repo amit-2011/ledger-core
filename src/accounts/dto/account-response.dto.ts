@@ -17,6 +17,13 @@ export class AccountResponseDto {
   })
   balanceMinor!: number;
 
+  @ApiProperty({
+    example: false,
+    description:
+      'Whether the account may go negative. Only the system external account does.',
+  })
+  allowNegativeBalance!: boolean;
+
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
 
@@ -26,6 +33,7 @@ export class AccountResponseDto {
     dto.name = account.name;
     dto.currency = account.currency;
     dto.balanceMinor = account.balanceMinor;
+    dto.allowNegativeBalance = account.allowNegativeBalance;
     dto.createdAt = account.createdAt;
     return dto;
   }

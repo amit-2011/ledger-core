@@ -34,6 +34,14 @@ export class Account {
   })
   balanceMinor!: number;
 
+  /**
+   * Whether this account may hold a negative balance. Only the system
+   * "External world" account sets this, so deposits and withdrawals stay
+   * balanced double-entry transfers while ordinary accounts can never overdraw.
+   */
+  @Column({ name: 'allow_negative_balance', type: 'boolean', default: false })
+  allowNegativeBalance!: boolean;
+
   @OneToMany(() => LedgerEntry, (entry) => entry.account)
   entries!: LedgerEntry[];
 
