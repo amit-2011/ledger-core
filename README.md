@@ -13,7 +13,43 @@ It demonstrates the boring-but-hard parts of moving money correctly:
 
 ## Status
 
-Early development.
+Early development. The application boots with a health endpoint and Swagger docs.
+The ledger domain (accounts, transfers, reconciliation) is being built next.
+
+## Requirements
+
+- Node.js 22+
+- pnpm 10+
+
+## Setup
+
+```bash
+pnpm install
+cp .env.example .env
+```
+
+## Run
+
+```bash
+pnpm start:dev        # watch mode
+pnpm start            # one-off
+pnpm start:prod       # from the compiled dist/
+```
+
+The service listens on PORT (default 3000):
+
+- Health check: http://localhost:3000/health
+- API docs (Swagger): http://localhost:3000/docs
+
+## Quality checks
+
+```bash
+pnpm type-check       # tsc strict, no emit
+pnpm lint             # eslint
+pnpm test             # unit tests
+pnpm test:e2e         # end-to-end tests
+pnpm test:cov         # coverage
+```
 
 ## Branching model
 
