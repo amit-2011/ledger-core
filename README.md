@@ -128,10 +128,11 @@ Available now:
 - `GET /accounts` list accounts, `GET /accounts/:id` read one account and its balance
 - `POST /transfers` move money between two accounts, guarded by an `Idempotency-Key` header
 - `GET /transfers/:id` read a transfer and its ledger entries
+- `GET /reconciliation` verify every recorded balance against the ledger and report any drift
 
 Planned (see roadmap):
 
-- reconciliation endpoint to verify balances against the ledger
+- live demo deployment
 
 ### Funding an account
 
@@ -166,7 +167,7 @@ curl -X POST localhost:3000/transfers \
 - [x] Accounts API: open accounts and read balances
 - [x] Transfers API: idempotent, atomic, double-entry transfers with row-level locking
 - [x] Test suite proving idempotency, the balance invariant, and concurrent transfers
-- [ ] Reconciliation: verify balances against the ledger and surface drift
+- [x] Reconciliation: verify balances against the ledger and surface drift
 - [ ] Live demo deployment
 
 ## Testing notes
