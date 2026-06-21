@@ -24,6 +24,7 @@
     "typeorm": "typeorm-ts-node-commonjs -d src/database/data-source.ts",
     "migration:generate": "pnpm typeorm migration:generate",
     "migration:run": "pnpm typeorm migration:run",
+    "migration:run:prod": "node dist/database/run-migrations.js",
     "migration:revert": "pnpm typeorm migration:revert",
     "db:up": "docker compose up -d db",
     "db:down": "docker compose down"

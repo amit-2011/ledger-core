@@ -31,7 +31,8 @@ async function bootstrap(): Promise<void> {
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT', 3000);
-  await app.listen(port);
+  // Bind to all interfaces so the app is reachable inside a container.
+  await app.listen(port, '0.0.0.0');
 }
 
 void bootstrap();

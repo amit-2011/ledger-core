@@ -9,18 +9,29 @@ import { DataSourceOptions } from 'typeorm';
 export function buildDataSourceOptions(
   env: NodeJS.ProcessEnv,
 ): DataSourceOptions {
-  return {
-    type: 'postgres',
-    host: env.DB_HOST ?? 'localhost',
-    port: Number(env.DB_PORT ?? '5432'),
-    username: env.DB_USERNAME ?? 'ledger',
-    password: env.DB_PASSWORD ?? 'ledger',
-    database: env.DB_NAME ?? 'ledger_core',
+  const base = {
+    type: 'postgres' as const,
     entities: [join(__dirname, '..', '**', '*.entity.{ts,js}')],
     migrations: [join(__dirname, 'migrations', '*.{ts,js}')],
     // Schema changes go through explicit migrations, never auto-sync.
     synchronize: false,
     migrationsRun: false,
     logging: env.DB_LOGGING === 'true',
+    // Managed Postgres often needs TLS. Set DB_SSL=true on the host.
+    ssl: env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
+  };
+
+  // Managed platforms (Railway, Render, Fly) expose a single connection URL.
+  if (env.DATABASE_URL) {
+    return { ...base, url: env.DATABASE_URL };
+  }
+
+  return {
+    ...base,
+    host: env.DB_HOST ?? 'localhost',
+    port: Number(env.DB_PORT ?? '5432'),
+    username: env.DB_USERNAME ?? 'ledger',
+    password: env.DB_PASSWORD ?? 'ledger',
+    database: env.DB_NAME ?? 'ledger_core',
   };
 }
