@@ -1,5 +1,8 @@
 # ledger-core
 
+[![CI](https://github.com/amit-2011/ledger-core/actions/workflows/ci.yml/badge.svg)](https://github.com/amit-2011/ledger-core/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 A small, production-style **payments core** that moves money correctly: a double-entry
 ledger with idempotent, atomic, balanced transfers. Built in NestJS, TypeScript and
 PostgreSQL.
@@ -66,6 +69,57 @@ A transfer of money from account A to account B happens inside one database
 transaction: the affected rows are locked, both ledger entries are written, both
 balances are updated, and the whole thing either commits together or rolls back
 together. There is no in-between state.
+
+## Architecture
+
+The app is a standard layered NestJS service. Each feature is a module with a thin
+controller over a service; all persistence goes through TypeORM to PostgreSQL.
+
+```mermaid
+flowchart LR
+    client["Client (curl / Swagger UI)"]
+
+    subgraph app["NestJS application"]
+        accounts["Accounts module"]
+        transfers["Transfers module"]
+        reconciliation["Reconciliation module"]
+        health["Health module"]
+    end
+
+    db[("PostgreSQL")]
+
+    client --> accounts
+    client --> transfers
+    client --> reconciliation
+    client --> health
+    accounts -->|TypeORM| db
+    transfers -->|"TypeORM + FOR UPDATE"| db
+    reconciliation -->|TypeORM| db
+```
+
+A transfer is where the reliability guarantees come together: idempotency is checked
+first, then the work happens inside one locked transaction.
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant T as TransfersService
+    participant DB as PostgreSQL
+
+    C->>T: POST /transfers (Idempotency-Key)
+    T->>DB: look up transfer by idempotency key
+    alt key already used
+        DB-->>T: existing transfer
+        T-->>C: 201 original transfer (no double charge)
+    else new transfer
+        T->>DB: BEGIN
+        T->>DB: SELECT both accounts FOR UPDATE
+        T->>T: check currency and sufficient funds
+        T->>DB: write debit + credit entries, update balances
+        T->>DB: COMMIT
+        T-->>C: 201 new transfer
+    end
+```
 
 ## Tech stack
 
