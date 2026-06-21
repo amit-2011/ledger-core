@@ -126,20 +126,47 @@ Available now:
 - `GET /docs` Swagger UI
 - `POST /accounts` open an account (always starts at a zero balance)
 - `GET /accounts` list accounts, `GET /accounts/:id` read one account and its balance
+- `POST /transfers` move money between two accounts, guarded by an `Idempotency-Key` header
+- `GET /transfers/:id` read a transfer and its ledger entries
 
 Planned (see roadmap):
 
-- `POST /transfers` move money between accounts, guarded by an idempotency key
 - reconciliation endpoint to verify balances against the ledger
+
+### Funding an account
+
+Accounts open at a zero balance, so money has to enter the system from somewhere.
+A system "External world" account (id `00000000-0000-4000-8000-000000000000`) is the
+counterparty for deposits and withdrawals: a deposit is simply a transfer from it to a
+user account. It is the only account allowed to go negative, which keeps the sum of all
+real balances at zero.
+
+### Example: moving money
+
+```bash
+EXTERNAL=00000000-0000-4000-8000-000000000000
+
+# Deposit 10000 (100.00) into Alice from the external account
+curl -X POST localhost:3000/transfers \
+  -H 'Content-Type: application/json' \
+  -H 'Idempotency-Key: deposit-alice-1' \
+  -d "{\"fromAccountId\":\"$EXTERNAL\",\"toAccountId\":\"$ALICE\",\"amountMinor\":10000,\"currency\":\"INR\"}"
+
+# Pay Bob 4000 from Alice. Sending the same Idempotency-Key again is a no-op.
+curl -X POST localhost:3000/transfers \
+  -H 'Content-Type: application/json' \
+  -H 'Idempotency-Key: alice-pays-bob-1' \
+  -d "{\"fromAccountId\":\"$ALICE\",\"toAccountId\":\"$BOB\",\"amountMinor\":4000,\"currency\":\"INR\"}"
+```
 
 ## Roadmap
 
 - [x] Project scaffold: NestJS, strict TypeScript, lint, health endpoint, Swagger
 - [x] PostgreSQL data layer: entities and migrations for accounts, transfers, ledger entries
 - [x] Accounts API: open accounts and read balances
-- [ ] Transfers API: idempotent, atomic, double-entry transfers with row-level locking
+- [x] Transfers API: idempotent, atomic, double-entry transfers with row-level locking
+- [x] Test suite proving idempotency, the balance invariant, and concurrent transfers
 - [ ] Reconciliation: verify balances against the ledger and surface drift
-- [ ] Test suite proving idempotency, the balance invariant, and concurrent transfers
 - [ ] Live demo deployment
 
 ## Testing notes
