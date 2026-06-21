@@ -118,6 +118,28 @@ pnpm test:e2e        # end-to-end tests
 pnpm test:cov        # coverage
 ```
 
+## Deploy to Railway
+
+The repository is deploy-ready. A multi-stage `Dockerfile` builds the app, and on
+every deploy any pending migrations run before the API starts (configured in
+`railway.json`).
+
+1. Create a new Railway project from this GitHub repo.
+2. Add a database: New -> Database -> PostgreSQL.
+3. In the app service Variables, add:
+   - `DATABASE_URL` = `${{Postgres.DATABASE_URL}}` (references the database over Railway's private network, no TLS needed)
+   - `DB_SSL` = `false` (set to `true` only if you connect over the public Postgres URL)
+   Railway sets `PORT` automatically.
+4. Deploy. Railway builds the Dockerfile, runs migrations, then starts the API.
+5. Settings -> Networking -> Generate Domain to get a public URL.
+
+The live demo is then served at:
+
+- Health: `https://<your-app>.up.railway.app/health`
+- API docs: `https://<your-app>.up.railway.app/docs`
+
+Once it is live, add the URL to the top of this README.
+
 ## API
 
 Available now:
