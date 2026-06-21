@@ -124,10 +124,11 @@ Available now:
 
 - `GET /health` liveness probe
 - `GET /docs` Swagger UI
+- `POST /accounts` open an account (always starts at a zero balance)
+- `GET /accounts` list accounts, `GET /accounts/:id` read one account and its balance
 
 Planned (see roadmap):
 
-- `POST /accounts` open an account, `GET /accounts/:id` read its balance
 - `POST /transfers` move money between accounts, guarded by an idempotency key
 - reconciliation endpoint to verify balances against the ledger
 
@@ -135,7 +136,7 @@ Planned (see roadmap):
 
 - [x] Project scaffold: NestJS, strict TypeScript, lint, health endpoint, Swagger
 - [x] PostgreSQL data layer: entities and migrations for accounts, transfers, ledger entries
-- [ ] Accounts API: open accounts and read balances
+- [x] Accounts API: open accounts and read balances
 - [ ] Transfers API: idempotent, atomic, double-entry transfers with row-level locking
 - [ ] Reconciliation: verify balances against the ledger and surface drift
 - [ ] Test suite proving idempotency, the balance invariant, and concurrent transfers
